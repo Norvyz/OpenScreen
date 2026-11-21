@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EncodingSettings } from '@/components/recording/EncodingSettings'
+import { Select } from '@/components/ui/Select'
 import { SettingRow } from '@/components/ui/SettingRow'
 import { Switch } from '@/components/ui/Switch'
 import { getApi } from '@/services/ipc'
@@ -49,6 +50,20 @@ export function RecordingSection() {
             label="Mostrar cursor"
             checked={recording.showCursor}
             onChange={(showCursor) => void update({ recording: { showCursor } })}
+          />
+        </SettingRow>
+        <SettingRow label="Cuenta atrás" description="Espera unos segundos antes de empezar a grabar.">
+          <Select
+            label="Cuenta atrás"
+            hideLabel
+            value={String(recording.countdown ?? 0)}
+            options={[
+              { value: '0', label: 'Sin cuenta atrás' },
+              { value: '3', label: '3 segundos' },
+              { value: '5', label: '5 segundos' },
+              { value: '10', label: '10 segundos' }
+            ]}
+            onChange={(value) => void update({ recording: { countdown: Number(value) } })}
           />
         </SettingRow>
         <EncodingSettings />

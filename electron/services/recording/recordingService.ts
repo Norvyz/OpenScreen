@@ -427,8 +427,10 @@ export class RecordingService {
       const ffmpegNeeded = plan?.transcode ?? tracks.length > 0
       if (ffmpegNeeded) {
         if (!(await this.ffmpeg.isAvailable())) {
-          // En WebM las pistas ya están guardadas como archivos Opus independientes.
-          if (this.currentFormat === 'webm' && !plan?.transcode) {
+          // Sin FFmpeg solo se puede conservar el contenedor que MediaRecorder ya produjo
+          // (WebM o MP4 nativo). Las pistas independientes quedan como archivos Opus/WebM
+          // separados; no se afirma que se hayan mezclado en el contenedor final.
+          if (!plan?.transcode) {
             await rename(tempPath, finalPath)
             return this.publishFinished(finalPath, request.durationMs, tracks)
           }

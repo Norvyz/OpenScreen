@@ -103,7 +103,7 @@ export class AudioEngine {
         if (kind === 'microphone') {
           const stream = await navigator.mediaDevices.getUserMedia({
             video: false,
-            audio: microphoneConstraints(settings.deviceId)
+            audio: microphoneConstraints(settings.deviceId, settings.noiseSuppression ?? true)
           })
           tracks = stream.getAudioTracks()
           label = tracks[0]?.label ?? null

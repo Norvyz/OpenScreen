@@ -102,6 +102,15 @@ function TrackControl({ kind, disabled }: TrackProps) {
         <span>{Math.round(track.volume * 100)}%</span>
       </div>
 
+      {kind === 'microphone' && (
+        <Switch
+          label="Supresión de ruido"
+          checked={track.noiseSuppression ?? true}
+          disabled={disabled || !track.enabled}
+          onChange={(value) => void updateTrack(kind, { noiseSuppression: value })}
+        />
+      )}
+
       <div
         className="mixer__level"
         role="meter"

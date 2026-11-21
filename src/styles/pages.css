@@ -619,6 +619,19 @@
   background: #000;
 }
 
+.stage__region {
+  position: absolute;
+  border: 2px solid var(--accent);
+  background: rgba(99, 102, 241, 0.18);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.stage__region--draft {
+  border-style: dashed;
+}
+
 .stage__placeholder {
   position: relative;
   display: flex;

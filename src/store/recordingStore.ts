@@ -43,6 +43,7 @@ interface RecordingState {
   status: RecordingStatus
   error: string | null
   busy: boolean
+  countdownRemaining: number | null
   ffmpegAvailable: boolean | null
   cursorHonored: boolean | null
   encodingCapabilities: EncodingCapabilities | null
@@ -167,6 +168,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   status: { ...EMPTY_RECORDING_STATUS },
   error: null,
   busy: false,
+  countdownRemaining: null,
   ffmpegAvailable: null,
   cursorHonored: null,
   encodingCapabilities: null,
@@ -226,7 +228,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
       return
     }
 
-    set({ busy: true, error: null, planWarnings: [] })
+    set({ busy: true, error: null, planWarnings: [], countdownRemaining: null })
     let acquired: MediaStream | null = null
 
     try {
@@ -244,6 +246,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
       // Debe ser la PRIMERA operación asíncrona: cualquier IPC previo consume la activación
       // transitoria del gesto y Chromium rechaza `getDisplayMedia`. Main concede la fuente
       // ya elegida y, en Windows, el loopback del sistema si la pista está activada.
+      const countdownSeconds = preferences.countdown ?? 0
       acquired = await navigator.mediaDevices.getDisplayMedia({
         video: captureVideoConstraints({
           showCursor: options.showCursor,
@@ -254,6 +257,16 @@ export const useRecordingStore = create<RecordingState>((set) => ({
         surfaceSwitching: 'exclude'
       } as DisplayMediaStreamOptions)
       stream = acquired
+
+      if (countdownSeconds > 0) {
+        for (let remaining = countdownSeconds; remaining > 0; remaining -= 1) {
+          set({ countdownRemaining: remaining })
+          await new Promise<void>((resolve) => {
+            window.setTimeout(resolve, 1000)
+          })
+        }
+        set({ countdownRemaining: null })
+      }
 
       const track = acquired.getVideoTracks()[0]
       if (!track) throw new Error('El stream de captura no contiene vídeo.')
@@ -388,7 +401,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
             }
           }
           cleanup()
-          set({ busy: false })
+          set({ busy: false, countdownRemaining: null })
           return
         }
 
@@ -413,7 +426,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
           }
         } finally {
           cleanup()
-          set({ busy: false })
+          set({ busy: false, countdownRemaining: null })
         }
       }
 
@@ -435,7 +448,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
       await stopAudioEngine()
       stopTracks()
       cleanup()
-      set({ busy: false, error: toMessage(error) })
+      set({ busy: false, countdownRemaining: null, error: toMessage(error) })
     }
   },
 

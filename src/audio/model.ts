@@ -18,11 +18,14 @@ export function chooseAudioMimeType(isSupported: (type: string) => boolean): str
   return AUDIO_MIME_PREFERENCES.find(isSupported) ?? null
 }
 
-export function microphoneConstraints(deviceId: string | null): AudioInputConstraints {
+export function microphoneConstraints(
+  deviceId: string | null,
+  noiseSuppression = true
+): AudioInputConstraints {
   return {
     ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
     echoCancellation: true,
-    noiseSuppression: true,
+    noiseSuppression,
     autoGainControl: true
   }
 }

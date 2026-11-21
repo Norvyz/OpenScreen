@@ -89,6 +89,8 @@ export function RecordingPage() {
                 selection={selection}
                 available={snapshot.selectionAvailable}
                 thumbnailUrl={selectedSource?.thumbnailUrl ?? null}
+                region={snapshot.region ?? null}
+                onRegionChange={(region) => void setRegion(region)}
               />
               <RecordingDock />
               <RecordingNotices />

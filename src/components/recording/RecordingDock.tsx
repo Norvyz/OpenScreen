@@ -87,8 +87,7 @@ export function RecordingDock() {
   const [, forceTick] = useState(0)
   const snapshot = useCaptureStore((state) => state.snapshot)
   const support = useAudioStore((state) => state.support)
-  const { status, busy, pause, resume, stop, cancel } = useRecordingStore()
-
+  const { status, busy, countdownRemaining, pause, resume, stop, cancel } = useRecordingStore()
   const active = status.state === 'recording' || status.state === 'paused'
   const selection = snapshot?.selection ?? null
   const canStart =
@@ -112,8 +111,12 @@ export function RecordingDock() {
       </div>
 
       <div className="dock__time" aria-label="Duración de la grabación">
-        <span className="dock__clock">{formatDuration(elapsedMs(status))}</span>
-        <Badge tone={active ? 'accent' : 'neutral'}>{statusLabel(status.state)}</Badge>
+        <span className="dock__clock">
+          {countdownRemaining !== null ? countdownRemaining : formatDuration(elapsedMs(status))}
+        </span>
+        <Badge tone={countdownRemaining !== null ? 'warning' : active ? 'accent' : 'neutral'}>
+          {countdownRemaining !== null ? 'Cuenta atrás' : statusLabel(status.state)}
+        </Badge>
       </div>
 
       <div className="dock__actions">

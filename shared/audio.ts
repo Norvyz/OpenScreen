@@ -41,7 +41,9 @@ export const audioTrackSettingsSchema = z
     enabled: z.boolean(),
     deviceId: z.string().nullable(),
     volume: z.number().min(0).max(2),
-    muted: z.boolean()
+    muted: z.boolean(),
+    /** Supresión de ruido del micrófono (constraint + filtro cuando esté disponible). */
+    noiseSuppression: z.boolean().optional()
   })
   .strict()
 export type AudioTrackSettings = z.infer<typeof audioTrackSettingsSchema>
@@ -59,7 +61,7 @@ export const audioSettingsSchema = z
 export type AudioSettings = z.infer<typeof audioSettingsSchema>
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
-  microphone: { enabled: true, deviceId: null, volume: 1, muted: false },
+  microphone: { enabled: true, deviceId: null, volume: 1, muted: false, noiseSuppression: true },
   system: {
     enabled: true,
     deviceId: null,

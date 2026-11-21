@@ -67,6 +67,8 @@ const DEFAULT_RECORDING_SETTINGS = {
   crf: null as number | null,
   keyframeInterval: null as number | null,
   preset: null as z.infer<typeof ffmpegPresetSchema> | null,
+  /** Cuenta atrás antes de iniciar la grabación (0, 3, 5 o 10 segundos). */
+  countdown: 3 as number,
   /** Perfiles creados por el usuario; los integrados se añaden en la interfaz. */
   profiles: [] as RecordingProfile[],
   activeProfileId: null as string | null,
@@ -89,6 +91,7 @@ const recordingSettingsSchema = z
     crf: z.number().int().min(0).max(51).nullable().catch(null),
     keyframeInterval: z.number().int().min(1).max(600).nullable().catch(null),
     preset: ffmpegPresetSchema.nullable().catch(null),
+    countdown: z.number().int().refine((v) => [0, 3, 5, 10].includes(v), 'Cuenta atrás no soportada').optional(),
     profiles: z.array(recordingProfileSchema).catch([]),
     activeProfileId: z.string().nullable().catch(null),
     fileNameTemplate: z.string().min(1).catch(DEFAULT_RECORDING_SETTINGS.fileNameTemplate),
@@ -220,6 +223,7 @@ export const settingsPatchSchema = z
         crf: z.number().int().min(0).max(51).nullable().optional(),
         keyframeInterval: z.number().int().min(1).max(600).nullable().optional(),
         preset: ffmpegPresetSchema.nullable().optional(),
+        countdown: z.number().int().refine((v) => [0, 3, 5, 10].includes(v)).optional(),
         profiles: z.array(recordingProfileSchema).optional(),
         activeProfileId: z.string().nullable().optional(),
         fileNameTemplate: z.string().min(1).optional(),
@@ -311,6 +315,8 @@ export function mergeSettings(current: Settings, patch: SettingsPatch): Settings
           : current.recording.keyframeInterval,
       preset:
         patch.recording?.preset !== undefined ? patch.recording.preset : current.recording.preset,
+      countdown:
+        patch.recording?.countdown !== undefined ? patch.recording.countdown : (current.recording.countdown ?? 3),
       profiles:
         patch.recording?.profiles !== undefined
           ? patch.recording.profiles
